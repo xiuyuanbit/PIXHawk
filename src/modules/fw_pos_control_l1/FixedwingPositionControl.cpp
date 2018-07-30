@@ -678,18 +678,10 @@ FixedwingPositionControl::in_takeoff_situation()
 void
 FixedwingPositionControl::do_takeoff_help(float *hold_altitude, float *pitch_limit_min)
 {
-	// vtol does not need takeoff help
-	if (_vehicle_status.is_vtol) {
-		return;
-	}
-
 	/* demand "climbout_diff" m above ground if user switched into this mode during takeoff */
 	if (in_takeoff_situation()) {
 		*hold_altitude = _takeoff_ground_alt + _parameters.climbout_diff;
 		*pitch_limit_min = radians(10.0f);
-
-	} else {
-		*pitch_limit_min = _parameters.pitch_limit_min;
 	}
 }
 
@@ -916,11 +908,14 @@ FixedwingPositionControl::control_position(const Vector2f &curr_pos, const Vecto
 		/* update desired altitude based on user pitch stick input */
 		bool climbout_requested = update_desired_altitude(dt);
 
-		/* if we assume that user is taking off then help by demanding altitude setpoint well above ground
-		* and set limit to pitch angle to prevent stearing into ground
-		*/
-		float pitch_limit_min{0.0f};
-		do_takeoff_help(&_hold_alt, &pitch_limit_min);
+		float pitch_limit_min = _parameters.pitch_limit_min;
+
+		// takeoff help only for planes, not including vtol
+		// if we assume that user is taking off then help by demanding altitude setpoint well above ground
+		// and set limit to pitch angle to prevent steering into ground
+		if (!vehicle_status.is_vtol) {
+			do_takeoff_help(&_hold_alt, &pitch_limit_min);
+		}
 
 		/* throttle limiting */
 		throttle_max = _parameters.throttle_max;
@@ -1018,11 +1013,14 @@ FixedwingPositionControl::control_position(const Vector2f &curr_pos, const Vecto
 		/* update desired altitude based on user pitch stick input */
 		bool climbout_requested = update_desired_altitude(dt);
 
-		/* if we assume that user is taking off then help by demanding altitude setpoint well above ground
-		* and set limit to pitch angle to prevent stearing into ground
-		*/
-		float pitch_limit_min{0.0f};
-		do_takeoff_help(&_hold_alt, &pitch_limit_min);
+		float pitch_limit_min = _parameters.pitch_limit_min;
+
+		// takeoff help only for planes, not including vtol
+		// if we assume that user is taking off then help by demanding altitude setpoint well above ground
+		// and set limit to pitch angle to prevent steering into ground
+		if (!vehicle_status.is_vtol) {
+			do_takeoff_help(&_hold_alt, &pitch_limit_min);
+		}
 
 		/* throttle limiting */
 		throttle_max = _parameters.throttle_max;
