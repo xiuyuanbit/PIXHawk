@@ -98,7 +98,7 @@ static bool check_calibration(const char *param_template, int32_t device_id)
 	return calibration_found;
 }
 
-static bool magnometerCheck(orb_advert_t *mavlink_log_pub, vehicle_status_s &status, unsigned instance, bool optional,
+static bool magnometerCheck(orb_advert_t *mavlink_log_pub, vehicle_status_s &status, uint8_t instance, bool optional,
 			    int32_t &device_id, bool report_fail)
 {
 	const bool exists = (orb_exists(ORB_ID(sensor_mag), instance) == PX4_OK);
@@ -234,7 +234,7 @@ static bool magConsistencyCheck(orb_advert_t *mavlink_log_pub, vehicle_status_s 
 	return true;
 }
 
-static bool accelerometerCheck(orb_advert_t *mavlink_log_pub, vehicle_status_s &status, unsigned instance,
+static bool accelerometerCheck(orb_advert_t *mavlink_log_pub, vehicle_status_s &status, uint8_t instance,
 			       bool optional, bool dynamic, int32_t &device_id, bool report_fail)
 {
 	const bool exists = (orb_exists(ORB_ID(sensor_accel), instance) == PX4_OK);
@@ -298,7 +298,7 @@ static bool accelerometerCheck(orb_advert_t *mavlink_log_pub, vehicle_status_s &
 	return success;
 }
 
-static bool gyroCheck(orb_advert_t *mavlink_log_pub, vehicle_status_s &status, unsigned instance, bool optional,
+static bool gyroCheck(orb_advert_t *mavlink_log_pub, vehicle_status_s &status, uint8_t instance, bool optional,
 		      int32_t &device_id, bool report_fail)
 {
 	const bool exists = (orb_exists(ORB_ID(sensor_gyro), instance) == PX4_OK);
@@ -343,7 +343,7 @@ static bool gyroCheck(orb_advert_t *mavlink_log_pub, vehicle_status_s &status, u
 	return calibration_valid && gyro_valid;
 }
 
-static bool baroCheck(orb_advert_t *mavlink_log_pub, vehicle_status_s &status, unsigned instance, bool optional,
+static bool baroCheck(orb_advert_t *mavlink_log_pub, vehicle_status_s &status, uint8_t instance, bool optional,
 		      int32_t &device_id, bool report_fail)
 {
 	const bool exists = (orb_exists(ORB_ID(sensor_baro), instance) == PX4_OK);
