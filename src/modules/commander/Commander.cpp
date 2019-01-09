@@ -561,12 +561,10 @@ Commander::Commander() :
 	ModuleParams(nullptr),
 	_failure_detector(this)
 {
-	_battery_sub = orb_subscribe(ORB_ID(battery_status));
 }
 
 Commander::~Commander()
 {
-	orb_unsubscribe(_battery_sub);
 }
 
 bool
@@ -1290,11 +1288,6 @@ Commander::run()
 	safety.safety_switch_available = false;
 	safety.safety_off = false;
 
-	/* Subscribe to geofence result topic */
-	int geofence_result_sub = orb_subscribe(ORB_ID(geofence_result));
-	struct geofence_result_s geofence_result;
-	memset(&geofence_result, 0, sizeof(geofence_result));
-
 	/* Subscribe to manual control data */
 	int sp_man_sub = orb_subscribe(ORB_ID(manual_control_setpoint));
 	memset(&sp_man, 0, sizeof(sp_man));
@@ -1850,21 +1843,16 @@ Commander::run()
 			}
 		}
 
-		/* start geofence result check */
-		orb_check(geofence_result_sub, &updated);
-
-		if (updated) {
-			orb_copy(ORB_ID(geofence_result), geofence_result_sub, &geofence_result);
-		}
-
 		// Geofence actions
-		if (armed.armed && (geofence_result.geofence_action != geofence_result_s::GF_ACTION_NONE)) {
+		_geofence_result_sub.update();
+
+		if (armed.armed && (_geofence_result_sub.get().geofence_action != geofence_result_s::GF_ACTION_NONE)) {
 
 			static bool geofence_loiter_on = false;
 			static bool geofence_rtl_on = false;
 
 			// check for geofence violation
-			if (geofence_result.geofence_violated) {
+			if (_geofence_result_sub.get().geofence_violated) {
 				static hrt_abstime last_geofence_violation = 0;
 				const hrt_abstime geofence_violation_action_interval = 10_s;
 
@@ -1872,7 +1860,7 @@ Commander::run()
 
 					last_geofence_violation = hrt_absolute_time();
 
-					switch (geofence_result.geofence_action) {
+					switch (_geofence_result_sub.get().geofence_action) {
 					case (geofence_result_s::GF_ACTION_NONE) : {
 							// do nothing
 							break;
@@ -4075,57 +4063,50 @@ void Commander::data_link_checks(int32_t highlatencydatalink_loss_timeout, int32
 
 void Commander::battery_status_check()
 {
-	bool updated = false;
-
 	/* update battery status */
-	orb_check(_battery_sub, &updated);
+	battery_status_s battery;
 
-	if (updated) {
+	if (_battery_sub.update(&battery)) {
 
-		battery_status_s battery = {};
+		if ((hrt_elapsed_time(&battery.timestamp) < 5_s)
+		    && battery.connected
+		    && (_battery_warning == battery_status_s::BATTERY_WARNING_NONE)) {
 
-		if (orb_copy(ORB_ID(battery_status), _battery_sub, &battery) == PX4_OK) {
+			status_flags.condition_battery_healthy = true;
 
-			if ((hrt_elapsed_time(&battery.timestamp) < 5_s)
-			    && battery.connected
-			    && (_battery_warning == battery_status_s::BATTERY_WARNING_NONE)) {
-
-				status_flags.condition_battery_healthy = true;
-
-			} else {
-				status_flags.condition_battery_healthy = false;
-			}
-
-			// execute battery failsafe if the state has gotten worse
-			if (armed.armed) {
-				if (battery.warning > _battery_warning) {
-					battery_failsafe(&mavlink_log_pub, status, status_flags, &internal_state, battery.warning,
-							 (low_battery_action_t)_low_bat_action.get());
-				}
-			}
-
-			// Handle shutdown request from emergency battery action
-			if (!armed.armed && (battery.warning != _battery_warning)) {
-
-				if (battery.warning == battery_status_s::BATTERY_WARNING_EMERGENCY) {
-					mavlink_log_critical(&mavlink_log_pub, "DANGEROUSLY LOW BATTERY, SHUT SYSTEM DOWN");
-					px4_usleep(200000);
-
-					int ret_val = px4_shutdown_request(false, false);
-
-					if (ret_val) {
-						mavlink_log_critical(&mavlink_log_pub, "SYSTEM DOES NOT SUPPORT SHUTDOWN");
-
-					} else {
-						while (1) { px4_usleep(1); }
-					}
-				}
-			}
-
-			// save last value
-			_battery_warning = battery.warning;
-			_battery_current = battery.current_filtered_a;
+		} else {
+			status_flags.condition_battery_healthy = false;
 		}
+
+		// execute battery failsafe if the state has gotten worse
+		if (armed.armed) {
+			if (battery.warning > _battery_warning) {
+				battery_failsafe(&mavlink_log_pub, status, status_flags, &internal_state, battery.warning,
+						 (low_battery_action_t)_low_bat_action.get());
+			}
+		}
+
+		// Handle shutdown request from emergency battery action
+		if (!armed.armed && (battery.warning != _battery_warning)) {
+
+			if (battery.warning == battery_status_s::BATTERY_WARNING_EMERGENCY) {
+				mavlink_log_critical(&mavlink_log_pub, "DANGEROUSLY LOW BATTERY, SHUT SYSTEM DOWN");
+				px4_usleep(200000);
+
+				int ret_val = px4_shutdown_request(false, false);
+
+				if (ret_val) {
+					mavlink_log_critical(&mavlink_log_pub, "SYSTEM DOES NOT SUPPORT SHUTDOWN");
+
+				} else {
+					while (1) { px4_usleep(1); }
+				}
+			}
+		}
+
+		// save last value
+		_battery_warning = battery.warning;
+		_battery_current = battery.current_filtered_a;
 	}
 }
 

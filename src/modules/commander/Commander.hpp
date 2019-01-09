@@ -52,6 +52,7 @@
 // subscriptions
 #include <uORB/Subscription.hpp>
 #include <uORB/topics/estimator_status.h>
+#include <uORB/topics/geofence_result.h>
 #include <uORB/topics/iridiumsbd_status.h>
 #include <uORB/topics/mission_result.h>
 #include <uORB/topics/vehicle_command.h>
@@ -59,8 +60,6 @@
 #include <uORB/topics/vehicle_local_position.h>
 
 using math::constrain;
-using uORB::Publication;
-using uORB::Subscription;
 
 using namespace time_literals;
 
@@ -179,20 +178,23 @@ private:
 
 	void estimator_check(bool *status_changed);
 
-	int _battery_sub{-1};
 	uint8_t _battery_warning{battery_status_s::BATTERY_WARNING_NONE};
 	float _battery_current{0.0f};
 
 	void battery_status_check();
 
 	// Subscriptions
-	Subscription<estimator_status_s>		_estimator_status_sub{ORB_ID(estimator_status)};
-	Subscription<iridiumsbd_status_s> 		_iridiumsbd_status_sub{ORB_ID(iridiumsbd_status)};
-	Subscription<mission_result_s>			_mission_result_sub{ORB_ID(mission_result)};
-	Subscription<vehicle_global_position_s>		_global_position_sub{ORB_ID(vehicle_global_position)};
-	Subscription<vehicle_local_position_s>		_local_position_sub{ORB_ID(vehicle_local_position)};
+	uORB::SubscriptionBase					_battery_sub{ORB_ID(battery_status)};
 
-	Publication<home_position_s>			_home_pub{ORB_ID(home_position)};
+	uORB::Subscription<estimator_status_s>			_estimator_status_sub{ORB_ID(estimator_status)};
+	uORB::Subscription<geofence_result_s>			_geofence_result_sub{ORB_ID(geofence_result)};
+	uORB::Subscription<iridiumsbd_status_s> 		_iridiumsbd_status_sub{ORB_ID(iridiumsbd_status)};
+	uORB::Subscription<mission_result_s>			_mission_result_sub{ORB_ID(mission_result)};
+	uORB::Subscription<vehicle_global_position_s>		_global_position_sub{ORB_ID(vehicle_global_position)};
+	uORB::Subscription<vehicle_local_position_s>		_local_position_sub{ORB_ID(vehicle_local_position)};
+
+	// Publications
+	uORB::Publication<home_position_s>			_home_pub{ORB_ID(home_position)};
 
 	orb_advert_t					_status_pub{nullptr};
 };
