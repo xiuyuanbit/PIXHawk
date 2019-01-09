@@ -98,16 +98,7 @@ public:
 	 * Constructor
 	 */
 	MavlinkReceiver(Mavlink *parent);
-
-	/**
-	 * Destructor, also kills the mavlinks task.
-	 */
-	~MavlinkReceiver();
-
-	/**
-	 * Display the mavlink status.
-	 */
-	void		print_status();
+	~MavlinkReceiver() = default;
 
 	/**
 	 * Start the receiver thread
@@ -128,6 +119,7 @@ private:
 	template<class T>
 	void handle_message_command_both(mavlink_message_t *msg, const T &cmd_mavlink,
 					 const vehicle_command_s &vehicle_command);
+
 	void handle_message_command_ack(mavlink_message_t *msg);
 	void handle_message_optical_flow_rad(mavlink_message_t *msg);
 	void handle_message_hil_optical_flow(mavlink_message_t *msg);
@@ -189,7 +181,7 @@ private:
 	 */
 	int decode_switch_pos_n(uint16_t buttons, unsigned sw);
 
-	bool	evaluate_target_ok(int command, int target_system, int target_component);
+	bool evaluate_target_ok(int command, int target_system, int target_component);
 
 	void send_flight_information();
 
@@ -201,77 +193,85 @@ private:
 	MavlinkParametersManager	_parameters_manager;
 	MavlinkFTP			_mavlink_ftp;
 	MavlinkLogHandler		_mavlink_log_handler;
-	MavlinkTimesync		_mavlink_timesync;
+	MavlinkTimesync			_mavlink_timesync;
 
-	mavlink_status_t _status; ///< receiver status, used for mavlink_parse_char()
-	struct vehicle_attitude_s _att;
-	struct vehicle_local_position_s _hil_local_pos;
-	struct vehicle_land_detected_s _hil_land_detector;
-	struct vehicle_control_mode_s _control_mode;
-	orb_advert_t _global_pos_pub;
-	orb_advert_t _local_pos_pub;
-	orb_advert_t _attitude_pub;
-	orb_advert_t _gps_pub;
-	orb_advert_t _gyro_pub;
-	orb_advert_t _accel_pub;
-	orb_advert_t _mag_pub;
-	orb_advert_t _baro_pub;
-	orb_advert_t _airspeed_pub;
-	orb_advert_t _battery_pub;
-	orb_advert_t _cmd_pub;
-	orb_advert_t _flow_pub;
-	orb_advert_t _hil_distance_sensor_pub;
-	orb_advert_t _flow_distance_sensor_pub;
-	orb_advert_t _distance_sensor_pub;
-	orb_advert_t _offboard_control_mode_pub;
-	orb_advert_t _actuator_controls_pubs[4];
-	orb_advert_t _att_sp_pub;
-	orb_advert_t _rates_sp_pub;
-	orb_advert_t _pos_sp_triplet_pub;
-	orb_advert_t _mocap_odometry_pub;
-	orb_advert_t _visual_odometry_pub;
-	orb_advert_t _radio_status_pub;
-	orb_advert_t _ping_pub;
-	orb_advert_t _rc_pub;
-	orb_advert_t _manual_pub;
-	orb_advert_t _obstacle_distance_pub;
-	orb_advert_t _trajectory_waypoint_pub;
-	orb_advert_t _land_detector_pub;
-	orb_advert_t _follow_target_pub;
-	orb_advert_t _landing_target_pose_pub;
-	orb_advert_t _transponder_report_pub;
-	orb_advert_t _collision_report_pub;
-	orb_advert_t _debug_key_value_pub;
-	orb_advert_t _debug_value_pub;
-	orb_advert_t _debug_vect_pub;
-	orb_advert_t _debug_array_pub;
-	static const int _gps_inject_data_queue_size = 6;
-	orb_advert_t _gps_inject_data_pub;
-	orb_advert_t _command_ack_pub;
-	int _control_mode_sub;
-	int _actuator_armed_sub;
-	int _vehicle_attitude_sub;
-	uint64_t _global_ref_timestamp;
-	int _hil_frames;
-	uint64_t _old_timestamp;
-	bool _hil_local_proj_inited;
-	float _hil_local_alt0;
-	struct map_projection_reference_s _hil_local_proj_ref;
-	struct offboard_control_mode_s _offboard_control_mode;
-	int	_orb_class_instance;
+	mavlink_status_t _status{}; ///< receiver status, used for mavlink_parse_char()
 
-	static constexpr unsigned MOM_SWITCH_COUNT = 8;
+	vehicle_attitude_s _att{};
+	vehicle_local_position_s _hil_local_pos{};
+	vehicle_land_detected_s _hil_land_detector{};
+	vehicle_control_mode_s _control_mode{};
 
-	uint8_t _mom_switch_pos[MOM_SWITCH_COUNT];
-	uint16_t _mom_switch_state;
+	orb_advert_t _global_pos_pub{nullptr};
+	orb_advert_t _local_pos_pub{nullptr};
+	orb_advert_t _attitude_pub{nullptr};
+	orb_advert_t _gps_pub{nullptr};
+	orb_advert_t _gyro_pub{nullptr};
+	orb_advert_t _accel_pub{nullptr};
+	orb_advert_t _mag_pub{nullptr};
+	orb_advert_t _baro_pub{nullptr};
+	orb_advert_t _airspeed_pub{nullptr};
+	orb_advert_t _battery_pub{nullptr};
+	orb_advert_t _cmd_pub{nullptr};
+	orb_advert_t _flow_pub{nullptr};
+	orb_advert_t _hil_distance_sensor_pub{nullptr};
+	orb_advert_t _flow_distance_sensor_pub{nullptr};
+	orb_advert_t _distance_sensor_pub{nullptr};
+	orb_advert_t _offboard_control_mode_pub{nullptr};
+	orb_advert_t _actuator_controls_pubs[4] {nullptr, nullptr, nullptr, nullptr};
+	orb_advert_t _att_sp_pub{nullptr};
+	orb_advert_t _rates_sp_pub{nullptr};
+	orb_advert_t _pos_sp_triplet_pub{nullptr};
+	orb_advert_t _mocap_odometry_pub{nullptr};
+	orb_advert_t _visual_odometry_pub{nullptr};
+	orb_advert_t _radio_status_pub{nullptr};
+	orb_advert_t _ping_pub{nullptr};
+	orb_advert_t _rc_pub{nullptr};
+	orb_advert_t _manual_pub{nullptr};
+	orb_advert_t _obstacle_distance_pub{nullptr};
+	orb_advert_t _trajectory_waypoint_pub{nullptr};
+	orb_advert_t _land_detector_pub{nullptr};
+	orb_advert_t _follow_target_pub{nullptr};
+	orb_advert_t _landing_target_pose_pub{nullptr};
+	orb_advert_t _transponder_report_pub{nullptr};
+	orb_advert_t _collision_report_pub{nullptr};
+	orb_advert_t _debug_key_value_pub{nullptr};
+	orb_advert_t _debug_value_pub{nullptr};
+	orb_advert_t _debug_vect_pub{nullptr};
+	orb_advert_t _debug_array_pub{nullptr};
+	orb_advert_t _gps_inject_data_pub{nullptr};
+	orb_advert_t _command_ack_pub{nullptr};
 
-	param_t _p_bat_emergen_thr;
-	param_t _p_bat_crit_thr;
-	param_t _p_bat_low_thr;
-	param_t _p_flow_rot;
-	param_t _p_flow_maxr;
-	param_t _p_flow_minhgt;
-	param_t _p_flow_maxhgt;
+	static constexpr int _gps_inject_data_queue_size{6};
+
+	uORB::SubscriptionBase _actuator_armed_sub{ORB_ID(actuator_armed)};
+	uORB::SubscriptionBase _control_mode_sub{ORB_ID(vehicle_control_mode)};
+	uORB::SubscriptionBase _vehicle_attitude_sub{ORB_ID(vehicle_attitude)};
+
+	uint64_t _global_ref_timestamp{0};
+	int _hil_frames{0};
+	uint64_t _old_timestamp{0};
+	bool _hil_local_proj_inited{false};
+	float _hil_local_alt0{0.0f};
+
+	struct map_projection_reference_s _hil_local_proj_ref {};
+
+	offboard_control_mode_s _offboard_control_mode{};
+
+	int	_orb_class_instance{-1};
+
+	static constexpr unsigned MOM_SWITCH_COUNT{8};
+
+	uint8_t _mom_switch_pos[MOM_SWITCH_COUNT] {};
+	uint16_t _mom_switch_state{0};
+
+	param_t _p_bat_emergen_thr{PARAM_INVALID};
+	param_t _p_bat_crit_thr{PARAM_INVALID};
+	param_t _p_bat_low_thr{PARAM_INVALID};
+	param_t _p_flow_rot{PARAM_INVALID};
+	param_t _p_flow_maxr{PARAM_INVALID};
+	param_t _p_flow_minhgt{PARAM_INVALID};
+	param_t _p_flow_maxhgt{PARAM_INVALID};
 
 	MavlinkReceiver(const MavlinkReceiver &) = delete;
 	MavlinkReceiver operator=(const MavlinkReceiver &) = delete;
