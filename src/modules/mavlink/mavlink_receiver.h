@@ -244,9 +244,9 @@ private:
 
 	static constexpr int _gps_inject_data_queue_size{6};
 
-	uORB::SubscriptionBase _actuator_armed_sub{ORB_ID(actuator_armed)};
-	uORB::SubscriptionBase _control_mode_sub{ORB_ID(vehicle_control_mode)};
-	uORB::SubscriptionBase _vehicle_attitude_sub{ORB_ID(vehicle_attitude)};
+	uORB::Subscription _actuator_armed_sub{ORB_ID(actuator_armed)};
+	uORB::Subscription _control_mode_sub{ORB_ID(vehicle_control_mode)};
+	uORB::Subscription _vehicle_attitude_sub{ORB_ID(vehicle_attitude)};
 
 	uint64_t _global_ref_timestamp{0};
 	int _hil_frames{0};

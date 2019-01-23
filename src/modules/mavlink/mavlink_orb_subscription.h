@@ -94,7 +94,7 @@ public:
 
 private:
 
-	uORB::SubscriptionBase	_sub;
+	uORB::Subscription	_sub;
 };
 
 

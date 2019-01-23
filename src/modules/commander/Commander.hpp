@@ -184,14 +184,14 @@ private:
 	void battery_status_check();
 
 	// Subscriptions
-	uORB::SubscriptionBase					_battery_sub{ORB_ID(battery_status)};
+	uORB::Subscription					_battery_sub{ORB_ID(battery_status)};
 
-	uORB::Subscription<estimator_status_s>			_estimator_status_sub{ORB_ID(estimator_status)};
-	uORB::Subscription<geofence_result_s>			_geofence_result_sub{ORB_ID(geofence_result)};
-	uORB::Subscription<iridiumsbd_status_s> 		_iridiumsbd_status_sub{ORB_ID(iridiumsbd_status)};
-	uORB::Subscription<mission_result_s>			_mission_result_sub{ORB_ID(mission_result)};
-	uORB::Subscription<vehicle_global_position_s>		_global_position_sub{ORB_ID(vehicle_global_position)};
-	uORB::Subscription<vehicle_local_position_s>		_local_position_sub{ORB_ID(vehicle_local_position)};
+	uORB::SubscriptionData<estimator_status_s>			_estimator_status_sub{ORB_ID(estimator_status)};
+	uORB::SubscriptionData<geofence_result_s>			_geofence_result_sub{ORB_ID(geofence_result)};
+	uORB::SubscriptionData<iridiumsbd_status_s> 		_iridiumsbd_status_sub{ORB_ID(iridiumsbd_status)};
+	uORB::SubscriptionData<mission_result_s>			_mission_result_sub{ORB_ID(mission_result)};
+	uORB::SubscriptionData<vehicle_global_position_s>		_global_position_sub{ORB_ID(vehicle_global_position)};
+	uORB::SubscriptionData<vehicle_local_position_s>		_local_position_sub{ORB_ID(vehicle_local_position)};
 
 	// Publications
 	uORB::Publication<home_position_s>			_home_pub{ORB_ID(home_position)};
