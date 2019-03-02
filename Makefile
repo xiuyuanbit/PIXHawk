@@ -337,8 +337,13 @@ format:
 
 # Testing
 # --------------------------------------------------------------------
-.PHONY: tests tests_coverage tests_mission tests_mission_coverage tests_offboard
+.PHONY: tests tests_coverage tests_mission tests_mission_coverage tests_offboard unit_test
 .PHONY: rostest python_coverage test_mixer_multirotor
+
+unit_test:
+	$(eval CMAKE_ARGS += -Dunit_testing=ON)
+	$(eval ARGS += unit_test)
+	$(call cmake-build,px4_sitl_default)
 
 test_mixer_multirotor:
 	@$(MAKE) -C "$(SRC_DIR)"/src/lib/mixer --no-print-directory tests
